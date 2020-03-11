@@ -1,0 +1,23 @@
+*.pyc
+.venv
+*aqua*
+venv/
+.vscode
+.coverage
+.idea
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+*.spec
+.eggs
+
+# Directory Cache Files
+thumbs.db
