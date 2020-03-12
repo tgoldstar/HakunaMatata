@@ -2,6 +2,9 @@ import yaml
 from kubernetes import config
 from openshift.dynamic import DynamicClient
 
+
+DNS_SUFFIX = "192.168.42.25.nip.io"
+
 k8s_client = config.new_client_from_config()
 dyn_client = DynamicClient(k8s_client)
 
@@ -127,6 +130,7 @@ def create_deployment_conf(namespace, app_name, replicas=1, port=8080):
           ports:
           - containerPort: {port}
             protocol: TCP
+            name: exposed
           resources: {{}}
     test: false
     triggers:
@@ -160,7 +164,7 @@ def create_service(namespace, app_name, port):
     name: s2i-{app_name}-container
   spec:
     ports:
-    - name: {port}-tcp
+    - name: exposed
       port: {port}
       protocol: TCP
       targetPort: {port}
@@ -171,13 +175,36 @@ def create_service(namespace, app_name, port):
     services.create(body=service_data, namespace=namespace)
 
 
-def create_route(namespace, app_name)
+def create_route(namespace, app_name):
+    client = dyn_client.resources.get(api_version='route.openshift.io/v1', kind='Route')
+    route = f"""
+    apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      annotations:
+      labels:
+        app: s2i-{app_name}-container
+        app.kubernetes.io/component: s2i-{app_name}-container
+        app.kubernetes.io/instance: s2i-{app_name}-container
+      name: s2i-{app_name}-container
+    spec:
+      host: {app_name}-{namespace}.{DNS_SUFFIX}
+      port:
+        targetPort: exposed
+      to:
+        kind: Service
+        name: s2i-{app_name}-container
+    """
+    data = yaml.load(route)
+    client.create(body=data, namespace=namespace)
 
 
 def create_s2i(name, source, port):
     namespace = "myproject"
     builder = "python:3.6"
-    create_image_stream(namespace, name)
-    create_build_conf(namespace, name, source, builder)
+
+    create_image_stream(namespace=namespace, app_name=name)
+    create_build_conf(namespace=namespace, app_name=name, source=source, builder=builder)
     create_deployment_conf(namespace=namespace, app_name=name, port=port)
-    create_service(namespace, name, port)
+    create_service(namespace=namespace, app_name=name, port=port)
+    create_route(namespace=namespace, app_name=name)
