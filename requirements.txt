@@ -1,4 +1,6 @@
+cython
 FastAPI
 uvicorn
 openshift
 ruamel.yaml
+pydantic
