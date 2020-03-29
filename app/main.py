@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Header, HTTPException, Depends
-from routers import s2i
+from .routers import s2i
 from app.auth import validate_key
 
 app = FastAPI()
