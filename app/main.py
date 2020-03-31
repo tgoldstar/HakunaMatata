@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Header, HTTPException, Depends
-from app.routers import oc
+from app.routers import s2i
 from app.auth import validate_key
 
 app = FastAPI()
@@ -9,7 +9,7 @@ async def get_token_header(x_token: str = Header(...)):
         raise HTTPException(status_code=400, detail="X-Token header invalid")
 
 app.include_router(
-    oc.router,
+    s2i.router,
     prefix="/oc",
     tags=["oc"],
     # dependencies=[Depends(get_token_header)],

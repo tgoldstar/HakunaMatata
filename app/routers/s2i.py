@@ -1,10 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from app.modules.oc import create_s2i
+
 
 class App(BaseModel):
     name: str
-    description: str
+    description: str = None
     source: str
     port: int
     
