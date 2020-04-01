@@ -1,15 +1,21 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 
-from app.modules.oc import create_s2i
+
+class Remote(BaseModel):
+    src: str
+    user: str = None
+    pw: str = None
 
 
 class App(BaseModel):
+    id: int = None
     name: str
     description: str = None
-    source: str
+    remote: Remote
     port: int
-    
+
+
 router = APIRouter()
 
 
@@ -18,13 +24,18 @@ async def create_app(app: App):
     return app
 
 
+@router.get("/{app_id}")
+async def get_app(app_id: int):
+    return
+
+
 @router.get("/")
-async def read_items():
+async def get_all_apps():
     return [{"name": "Item Foo"}, {"name": "item Bar"}]
 
 
 @router.patch("/")
-async def update_s2i():
+async def update_app():
     return
 
 
